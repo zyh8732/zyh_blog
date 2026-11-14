@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="{{ site.lang | default: 'zh-CN' }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>{% if page.title %}{{ page.title }} · {% endif %}{{ site.title }}</title>
+
+  {%- comment -%} SEO：优先用文章自己的 description，其次摘要，最后站点描述 {%- endcomment -%}
+  {%- assign meta_desc = page.description -%}
+  {%- if meta_desc == nil or meta_desc == "" -%}
+    {%- assign meta_desc = page.excerpt | strip_html | strip -%}
+  {%- endif -%}
+  {%- if meta_desc == nil or meta_desc == "" -%}
+    {%- assign meta_desc = site.description -%}
+  {%- endif -%}
+  <meta name="description" content="{{ meta_desc | strip_newlines | truncate: 150 | escape }}">
+  <link rel="canonical" href="{{ page.url | absolute_url }}">
+
+  <!-- 明暗主题：必须在样式表之前执行，避免刷新时闪白/闪黑 -->
+  <script>
+    (function () {
+      var t = 'auto';
+      try { t = localStorage.getItem('zyh-theme') || 'auto'; } catch (e) {}
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
+
+  {% feed_meta %}
+  <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="{{ '/' | relative_url }}">{{ site.title }}</a>
+    <nav>
+      <a href="{{ '/' | relative_url }}">首页</a>
+      <a href="{{ '/blog/' | relative_url }}">文章树</a>
+    </nav>
+  </header>
+
+  <main>
+    {{ content }}
+  </main>
+
+  <footer>
+    <span>© {{ site.time | date: "%Y" }} {{ site.author }}</span>
+    <span>Powered by <a href="https://jekyllrb.com/">Jekyll</a> · GitHub Pages</span>
+  </footer>
+</body>
+</html>

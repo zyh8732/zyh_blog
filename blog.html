@@ -1,0 +1,23 @@
+---
+layout: default
+title: 文章树
+permalink: /blog/
+---
+<h1>文章树</h1>
+<p class="meta">共 {{ site.posts.size }} 篇</p>
+
+<p class="tree-tools">
+  <button type="button" data-tree="expand">全部展开</button>
+  <button type="button" data-tree="collapse">全部折叠</button>
+</p>
+
+{% include tree.html %}
+
+<script>
+  document.querySelectorAll('[data-tree]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var open = btn.getAttribute('data-tree') === 'expand';
+      document.querySelectorAll('.tree details').forEach(function (d) { d.open = open; });
+    });
+  });
+</script>

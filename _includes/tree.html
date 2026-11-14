@@ -1,0 +1,43 @@
+{%- comment -%}
+  ──────────────────────────────────────────────────────────
+  树形导航入口（纯 Liquid，零插件依赖）
+
+  节点来源 = 文章的 categories，而 categories 由「_posts 上层的
+  目录名」自动生成。例如：
+    技术/前端/_posts/2025-01-03-css-vars.md
+      → categories = ["技术", "前端"]
+      → 产出节点：技术 , 技术/前端
+
+  所以「文件夹即节点」，新建文件夹 + 在里面写文章 = 树上多一层。
+  ──────────────────────────────────────────────────────────
+{%- endcomment -%}
+
+{%- assign sep       = "|" -%}
+{%- assign collected = "" -%}
+
+{%- for post in site.posts -%}
+  {%- assign acc = "" -%}
+  {%- for cat in post.categories -%}
+    {%- assign s = cat | strip -%}
+    {%- if acc == "" -%}
+      {%- assign acc = s -%}
+    {%- else -%}
+      {%- assign acc = acc | append: "/" | append: s -%}
+    {%- endif -%}
+    {%- if collected == "" -%}
+      {%- assign collected = acc -%}
+    {%- else -%}
+      {%- assign collected = collected | append: sep | append: acc -%}
+    {%- endif -%}
+  {%- endfor -%}
+{%- endfor -%}
+
+{%- if collected == "" -%}
+  {%- assign folders = "" | split: "," -%}
+{%- else -%}
+  {%- assign folders = collected | split: sep | uniq | sort -%}
+{%- endif -%}
+
+<ul class="tree">
+  {%- include tree-node.html folders=folders depth=0 -%}
+</ul>
