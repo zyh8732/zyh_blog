@@ -13,10 +13,10 @@ title: 首页
 
 <p>{{ site.description }}</p>
 
-<p>最新文章（完整结构见 <a href="{{ '/blog/' | relative_url }}">文章树</a>）：</p>
+<p>全部文章：</p>
 
 <ul class="post-list">
-  {%- for post in site.posts limit: 10 %}
+  {%- for post in site.posts %}
   <li>
     <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
     <time>{{ post.date | date: "%Y-%m-%d" }}</time>
