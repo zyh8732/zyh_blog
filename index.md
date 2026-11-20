@@ -25,8 +25,6 @@ title: 首页
   {%- endfor %}
 </ul>
 
-<p style="margin-top:1.5rem"><a href="{{ '/blog/' | relative_url }}">→ 查看全部文章树</a></p>
-
 <script>
   (function () {
     var KEY = 'zyh-theme';
