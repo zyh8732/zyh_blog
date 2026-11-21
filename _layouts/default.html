@@ -4,7 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light dark">
-  <title>{% if page.title %}{{ page.title }} · {% endif %}{{ site.title }}</title>
+  {%- assign doc_title = page.title -%}
+  {%- if page.layout == "post" -%}
+    {%- assign doc_title = page.name | split: "." | first -%}
+  {%- endif -%}
+  <title>{% if doc_title %}{{ doc_title }} · {% endif %}{{ site.title }}</title>
 
   {%- comment -%} SEO：优先用页面自己的 description，其次摘要，最后站点描述 {%- endcomment -%}
   {%- assign meta_desc = page.description -%}

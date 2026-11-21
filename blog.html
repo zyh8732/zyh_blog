@@ -5,7 +5,7 @@ permalink: /blog/
 ---
 {%- assign arts = site.pages | where_exp: "p", "p.name contains '.md'" | where_exp: "p", "p.path != 'index.md'" -%}
 <h1>树</h1>
-<p class="meta">共 {{ arts.size }} 篇 · 图片与 .txt 直接放在节点目录里</p>
+<p class="meta">共 {{ arts.size }} 篇</p>
 
 <p class="tree-tools">
   <button type="button" data-tree="expand">全部展开</button>
@@ -28,11 +28,12 @@ permalink: /blog/
     });
   });
 
-  // 图片灯箱：点缩略图原地放大，点关闭键 / 遮罩 / Esc 关闭
+  // 图片灯箱：点缩略图原地放大，只有关闭键能关
   (function () {
     var box = document.getElementById('lightbox');
     var img = document.getElementById('lightbox-img');
-    if (!box || !img) return;
+    var closeBtn = box ? box.querySelector('.lightbox-close') : null;
+    if (!box || !img || !closeBtn) return;
 
     function close() {
       box.hidden = true;
@@ -48,12 +49,6 @@ permalink: /blog/
       });
     });
 
-    box.addEventListener('click', function (e) {
-      if (e.target === box || e.target.classList.contains('lightbox-close')) close();
-    });
-
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && !box.hidden) close();
-    });
+    closeBtn.addEventListener('click', close);
   })();
 </script>

@@ -4,7 +4,6 @@ title: 文本
 permalink: /read/
 ---
 <h1 id="txt-title">加载中…</h1>
-<p class="meta"><a id="txt-link" href="#" target="_blank" rel="noopener">打开原始文件</a></p>
 
 <pre id="txt-body" class="txt-body">加载中…</pre>
 
@@ -14,7 +13,6 @@ permalink: /read/
     var file = params.get('f') || '';
     var titleEl = document.getElementById('txt-title');
     var bodyEl = document.getElementById('txt-body');
-    var linkEl = document.getElementById('txt-link');
 
     if (!file) {
       titleEl.textContent = '没有指定文件';
@@ -22,9 +20,7 @@ permalink: /read/
       return;
     }
 
-    var name = file.split('/').pop().split('?')[0];
-    titleEl.textContent = name.replace(/\.[^.]+$/, '');
-    linkEl.href = file;
+    titleEl.textContent = file.split('/').pop().split('?')[0];
 
     fetch(file, { cache: 'no-cache' })
       .then(function (res) {

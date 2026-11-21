@@ -187,20 +187,12 @@ footer{
 }
 
 /* ==========================================================
-   树里的文件与分组
+   树里的文件
    ========================================================== */
-.tree li.group{ padding:.15rem 0; }
-.tree .group-name{
-  display:block; font-size:.76rem; color:var(--muted);
-  letter-spacing:.05em; padding:.25rem .35rem .1rem;
-}
-
 .tree li.file{
   display:flex; align-items:center; gap:.5rem; flex-wrap:wrap;
   padding-left:1.15rem; font-size:.9rem;
 }
-.tree li.file::before{ font-size:.8rem; opacity:.85; }
-.tree li.file-doc::before{ content:"📎"; }
 .tree li.file a{ text-decoration:none; }
 .tree li.file a:hover{ text-decoration:underline; }
 
