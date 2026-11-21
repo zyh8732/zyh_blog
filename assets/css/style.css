@@ -106,6 +106,7 @@ footer{
   background:var(--code); border-radius:4px;
   padding:.05rem .45rem; margin-left:.4rem; font-size:.8rem;
 }
+.back{ margin-top:2.5rem; font-size:.9rem; }
 .post img{ max-width:100%; height:auto; border-radius:6px; }
 .post pre{
   background:var(--code); padding:.9rem 1rem; border-radius:8px;
