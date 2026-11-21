@@ -23,7 +23,7 @@ title: 首页
   {%- assign n    = segs.size | minus: 1 -%}
   {%- assign pdir = segs | slice: 0, n | join: "/" -%}
   <li>
-    <a href="{{ p.url | relative_url }}">{{ p.name | split: "." | first }}</a>
+    <a href="{{ p.url | relative_url }}">{{ p.name }}</a>
     {%- if pdir != "" %}<span class="path">{{ pdir | replace: "/", " / " }}</span>{% endif %}
   </li>
   {%- endfor %}
