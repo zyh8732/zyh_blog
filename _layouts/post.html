@@ -1,17 +1,19 @@
 ---
 layout: default
 ---
+{%- assign pname = page.title -%}
+{%- if pname == nil or pname == "" -%}
+  {%- assign pname = page.name | split: "." | first -%}
+{%- endif -%}
+{%- assign pdir = page.dir | default: "/" | remove_first: "/" | remove_last: "/" -%}
+
 <article class="post">
-  <h1>{{ page.title }}</h1>
-  <p class="meta">
-    <time>{{ page.date | date: "%Y-%m-%d" }}</time>
-    {%- assign cats = page.categories -%}
-    {%- if cats and cats.size > 0 %}
-    <span class="path">{{ cats | join: " / " }}</span>
-    {%- endif %}
-  </p>
+  <h1>{{ pname }}</h1>
+  {%- if pdir != "" %}
+  <p class="meta"><span class="path">{{ pdir | replace: "/", " / " }}</span></p>
+  {%- endif %}
 
   {{ content }}
 </article>
 
-<p class="back"><a href="{{ '/blog/' | relative_url }}">← 返回文章树</a></p>
+<p class="back"><a href="{{ '/blog/' | relative_url }}">← 返回树</a></p>

@@ -2,27 +2,29 @@
   ──────────────────────────────────────────────────────────
   树形导航入口（纯 Liquid，零插件依赖）
 
-  节点来源 = 文章的 categories，而 categories 由「_posts 上层的
-  目录名」自动生成。例如：
-    技术/前端/_posts/2025-01-03-css-vars.md
-      → categories = ["技术", "前端"]
-      → 产出节点：技术 , 技术/前端
+  节点 = 目录。每个节点里可以放：
+    文章(.md) / 图片 / 文本(.txt) / 子节点
+  assets/ 是图床，不参与树的展示。
 
-  所以「文件夹即节点」，新建文件夹 + 在里面写文章 = 树上多一层。
+  这里先把「所有涉及的目录路径」收集成数组，再交给 tree-node.html 递归。
   ──────────────────────────────────────────────────────────
 {%- endcomment -%}
 
 {%- assign sep       = "|" -%}
 {%- assign collected = "" -%}
 
-{%- for post in site.posts -%}
-  {%- assign acc = "" -%}
-  {%- for cat in post.categories -%}
-    {%- assign s = cat | strip -%}
+{%- comment -%} ① 文章（.md 页面，index.md 除外）所在的目录 {%- endcomment -%}
+{%- assign articles = site.pages | where_exp: "p", "p.name contains '.md' and p.path != 'index.md'" -%}
+{%- for p in articles -%}
+  {%- assign segs = p.path | split: "/" -%}
+  {%- assign n    = segs.size | minus: 1 -%}
+  {%- assign acc  = "" -%}
+  {%- for s in segs limit: n -%}
+    {%- assign s2 = s | strip -%}
     {%- if acc == "" -%}
-      {%- assign acc = s -%}
+      {%- assign acc = s2 -%}
     {%- else -%}
-      {%- assign acc = acc | append: "/" | append: s -%}
+      {%- assign acc = acc | append: "/" | append: s2 -%}
     {%- endif -%}
     {%- if collected == "" -%}
       {%- assign collected = acc -%}
@@ -30,6 +32,30 @@
       {%- assign collected = collected | append: sep | append: acc -%}
     {%- endif -%}
   {%- endfor -%}
+{%- endfor -%}
+
+{%- comment -%} ② 图片 / 文本所在的目录（跳过 assets 图床） {%- endcomment -%}
+{%- for f in site.static_files -%}
+  {%- assign fp       = f.path | remove_first: "/" -%}
+  {%- assign segs     = fp | split: "/" -%}
+  {%- assign n        = segs.size | minus: 1 -%}
+  {%- assign firstseg = segs | first -%}
+  {%- if firstseg != "assets" -%}
+    {%- assign acc = "" -%}
+    {%- for s in segs limit: n -%}
+      {%- assign s2 = s | strip -%}
+      {%- if acc == "" -%}
+        {%- assign acc = s2 -%}
+      {%- else -%}
+        {%- assign acc = acc | append: "/" | append: s2 -%}
+      {%- endif -%}
+      {%- if collected == "" -%}
+        {%- assign collected = acc -%}
+      {%- else -%}
+        {%- assign collected = collected | append: sep | append: acc -%}
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endif -%}
 {%- endfor -%}
 
 {%- if collected == "" -%}

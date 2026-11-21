@@ -2,18 +2,15 @@
 #  Jekyll 配置 · 纯 GitHub Pages（无自定义域名）
 #  仓库名：zyh_blog
 #  访问地址：https://<你的用户名>.github.io/zyh_blog/
-#  需要你改的只有三行：title / author / url
 # ============================================================
 
-title: Sun-Stealing_Squad
+title: My blog
 description: Hello world!
 author: zyh
 lang: zh-CN
 
 # --- 最容易错的两行 -----------------------------------------
-# 仓库是「项目站点」而不是 <用户名>.github.io，所以必须带子路径
 baseurl: "/zyh_blog"
-# 改成你的 GitHub 用户名；只影响 RSS / sitemap 里的绝对链接
 url: "https://zyh8732.github.io"
 # ------------------------------------------------------------
 
@@ -21,13 +18,10 @@ markdown: kramdown
 highlighter: rouge
 timezone: Asia/Shanghai
 
-# 文章永久链接：/zyh_blog/2025/01/02/hello-world/
-# 注意：不把 :categories 放进来，避免中文目录出现在 URL 里
-permalink: /:year/:month/:day/:title/
-
-# 只用 GitHub Pages 白名单内的插件
+# 文章＝节点目录下的「名字.md」，不写 front matter（没有 title / date）
+# jekyll-optional-front-matter 让没有 front matter 的 Markdown 也能被渲染
 plugins:
-  - jekyll-feed
+  - jekyll-optional-front-matter
   - jekyll-sitemap
 
 # 不参与构建
@@ -35,11 +29,11 @@ exclude:
   - README.md
   - .gitignore
 
-# 文章只需 front matter 里的 title / date，layout 自动套 post
+# 所有页面默认套文章布局（index / blog / 404 / read 有自己的 layout，会覆盖这里）
 defaults:
   - scope:
       path: ""
-      type: posts
+      type: pages
     values:
       layout: post
 

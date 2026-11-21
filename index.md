@@ -13,14 +13,17 @@ title: 首页
 
 <p>{{ site.description }}</p>
 
-<p>全部文章：</p>
+<p>全部：</p>
 
+{%- assign arts = site.pages | where_exp: "p", "p.name contains '.md' and p.path != 'index.md'" | sort: "path" -%}
 <ul class="post-list">
-  {%- for post in site.posts %}
+  {%- for p in arts %}
+  {%- assign segs = p.path | split: "/" -%}
+  {%- assign n    = segs.size | minus: 1 -%}
+  {%- assign pdir = segs | slice: 0, n | join: "/" -%}
   <li>
-    <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
-    <time>{{ post.date | date: "%Y-%m-%d" }}</time>
-    {%- if post.categories.size > 0 %}<span class="path">{{ post.categories | join: " / " }}</span>{% endif %}
+    <a href="{{ p.url | relative_url }}">{{ p.name | split: "." | first }}</a>
+    {%- if pdir != "" %}<span class="path">{{ pdir | replace: "/", " / " }}</span>{% endif %}
   </li>
   {%- endfor %}
 </ul>

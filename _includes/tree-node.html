@@ -1,21 +1,23 @@
 {%- comment -%}
   ──────────────────────────────────────────────────────────
-  递归渲染一层树节点。由 tree.html 调用，自身也会递归调用。
+  递归渲染一层节点。由 tree.html 调用，自身也会递归调用。
 
   参数：
     folders : 全部节点路径（数组，tree.html 算好的）
-    parent  : 当前父节点路径；根层不传（视作 ""）
+    parent  : 当前节点路径；根层不传（视作 ""）
     depth   : 当前层级；根层传 0
 
+  每个节点下依次渲染：子节点 → 文章(md) → 图片 → 文章(txt)
+
   ⚠️ 两条 Liquid 约束，改这个文件时务必保持：
-   1. assign 写入的是「最外层作用域」，递归子调用会覆盖同名变量。
+   1. assign 写入「最外层作用域」，递归子调用会覆盖同名变量。
       所以每个变量都在紧挨着使用前重新赋值，绝不跨递归调用复用。
    2. 不要给 for 循环变量重新赋值（{% assign cat = cat | strip %} 无效），
-      要用一个新名字（下面的 s）。
+      要用一个新名字（下面的 s2）。
   ──────────────────────────────────────────────────────────
 {%- endcomment -%}
 
-{%- comment -%} ① 先渲染本层的子节点（先文件夹、后文章，像文件管理器） {%- endcomment -%}
+{%- comment -%} ① 子节点（文件夹） {%- endcomment -%}
 {%- for folder in include.folders -%}
   {%- assign pcmp     = include.parent | default: "" -%}
   {%- assign segs     = folder | split: "/" -%}
@@ -24,28 +26,9 @@
 
   {%- if myparent == pcmp -%}
     {%- assign name = segs | last -%}
-
-    {%- comment -%} 直接归在这个文件夹下的文章数 {%- endcomment -%}
-    {%- assign count = 0 -%}
-    {%- for post in site.posts -%}
-      {%- assign jpath = "" -%}
-      {%- for cat in post.categories -%}
-        {%- assign s = cat | strip -%}
-        {%- if jpath == "" -%}
-          {%- assign jpath = s -%}
-        {%- else -%}
-          {%- assign jpath = jpath | append: "/" | append: s -%}
-        {%- endif -%}
-      {%- endfor -%}
-      {%- if jpath == folder -%}{%- assign count = count | plus: 1 -%}{%- endif -%}
-    {%- endfor -%}
-
     <li class="folder">
       <details open>
-        <summary>
-          <span class="name">{{ name }}</span>
-          {%- if count > 0 -%}<span class="count">{{ count }}</span>{%- endif -%}
-        </summary>
+        <summary><span class="name">{{ name }}</span></summary>
         <ul>
           {%- assign d = include.depth | default: 0 -%}
           {%- if d < 128 -%}
@@ -58,22 +41,78 @@
   {%- endif -%}
 {%- endfor -%}
 
-{%- comment -%} ② 再渲染直接挂在本层节点上的文章 {%- endcomment -%}
-{%- for post in site.posts -%}
-  {%- assign pcmp  = include.parent | default: "" -%}
-  {%- assign jpath = "" -%}
-  {%- for cat in post.categories -%}
-    {%- assign s = cat | strip -%}
-    {%- if jpath == "" -%}
-      {%- assign jpath = s -%}
-    {%- else -%}
-      {%- assign jpath = jpath | append: "/" | append: s -%}
+{%- comment -%} ② 文章(md) {%- endcomment -%}
+{%- assign arts = site.pages | where_exp: "p", "p.name contains '.md' and p.path != 'index.md'" -%}
+{%- capture arts_html -%}
+  {%- for p in arts -%}
+    {%- assign segs = p.path | split: "/" -%}
+    {%- assign n    = segs.size | minus: 1 -%}
+    {%- assign pdir = segs | slice: 0, n | join: "/" -%}
+    {%- assign pcmp = include.parent | default: "" -%}
+    {%- if pdir == pcmp -%}
+      <li class="post"><a href="{{ p.url | relative_url }}">{{ p.name | split: "." | first }}</a></li>
     {%- endif -%}
   {%- endfor -%}
-  {%- if jpath == pcmp -%}
-    <li class="post">
-      <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
-      <time>{{ post.date | date: "%Y-%m-%d" }}</time>
-    </li>
-  {%- endif -%}
-{%- endfor -%}
+{%- endcapture -%}
+{%- assign arts_trim = arts_html | strip -%}
+{%- if arts_trim != "" -%}
+  <li class="group">
+    <span class="group-name">文章(md)</span>
+    <ul class="group-list">{{ arts_html }}</ul>
+  </li>
+{%- endif -%}
+
+{%- comment -%} ③ 图片 {%- endcomment -%}
+{%- capture imgs_html -%}
+  {%- for f in site.static_files -%}
+    {%- assign fp       = f.path | remove_first: "/" -%}
+    {%- assign segs     = fp | split: "/" -%}
+    {%- assign n        = segs.size | minus: 1 -%}
+    {%- assign fdir     = segs | slice: 0, n | join: "/" -%}
+    {%- assign firstseg = segs | first -%}
+    {%- assign pcmp     = include.parent | default: "" -%}
+    {%- assign ext      = f.extname | downcase -%}
+    {%- if firstseg != "assets" and fdir == pcmp -%}
+      {%- if ext == ".png" or ext == ".jpg" or ext == ".jpeg" or ext == ".gif" or ext == ".webp" or ext == ".svg" or ext == ".avif" -%}
+        <li class="file file-img">
+          <button type="button" class="thumb-btn" data-full="{{ f.path | relative_url }}" data-name="{{ f.name }}">
+            <img class="thumb" src="{{ f.path | relative_url }}" alt="{{ f.name }}" loading="lazy">
+          </button>
+          <span class="file-name">{{ f.name }}</span>
+        </li>
+      {%- endif -%}
+    {%- endif -%}
+  {%- endfor -%}
+{%- endcapture -%}
+{%- assign imgs_trim = imgs_html | strip -%}
+{%- if imgs_trim != "" -%}
+  <li class="group">
+    <span class="group-name">图片</span>
+    <ul class="group-list">{{ imgs_html }}</ul>
+  </li>
+{%- endif -%}
+
+{%- comment -%} ④ 文章(txt) {%- endcomment -%}
+{%- capture txts_html -%}
+  {%- for f in site.static_files -%}
+    {%- assign fp       = f.path | remove_first: "/" -%}
+    {%- assign segs     = fp | split: "/" -%}
+    {%- assign n        = segs.size | minus: 1 -%}
+    {%- assign fdir     = segs | slice: 0, n | join: "/" -%}
+    {%- assign firstseg = segs | first -%}
+    {%- assign pcmp     = include.parent | default: "" -%}
+    {%- assign ext      = f.extname | downcase -%}
+    {%- if firstseg != "assets" and fdir == pcmp and ext == ".txt" -%}
+      <li class="file file-doc">
+        <a href="{{ '/read/' | relative_url }}?f={{ f.path | relative_url }}" target="_blank" rel="noopener">{{ f.name }}</a>
+      </li>
+    {%- endif -%}
+  {%- endfor -%}
+{%- endcapture -%}
+{%- assign txts_trim = txts_html | strip -%}
+{%- if txts_trim != "" -%}
+  <li class="group">
+    <span class="group-name">文章(txt)</span>
+    <ul class="group-list">{{ txts_html }}</ul>
+  </li>
+{%- endif -%}

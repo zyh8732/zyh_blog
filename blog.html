@@ -1,10 +1,11 @@
 ---
 layout: default
-title: 文章树
+title: 树
 permalink: /blog/
 ---
-<h1>文章树</h1>
-<p class="meta">共 {{ site.posts.size }} 篇</p>
+{%- assign arts = site.pages | where_exp: "p", "p.name contains '.md' and p.path != 'index.md'" -%}
+<h1>树</h1>
+<p class="meta">共 {{ arts.size }} 篇 · 图片与 .txt 直接放在节点目录里</p>
 
 <p class="tree-tools">
   <button type="button" data-tree="expand">全部展开</button>
@@ -13,11 +14,46 @@ permalink: /blog/
 
 {% include tree.html %}
 
+<div id="lightbox" class="lightbox" hidden>
+  <button type="button" class="lightbox-close" aria-label="关闭">×</button>
+  <img id="lightbox-img" alt="">
+</div>
+
 <script>
+  // 树的展开 / 折叠
   document.querySelectorAll('[data-tree]').forEach(function (btn) {
     btn.addEventListener('click', function () {
       var open = btn.getAttribute('data-tree') === 'expand';
       document.querySelectorAll('.tree details').forEach(function (d) { d.open = open; });
     });
   });
+
+  // 图片灯箱：点缩略图原地放大，点关闭键 / 遮罩 / Esc 关闭
+  (function () {
+    var box = document.getElementById('lightbox');
+    var img = document.getElementById('lightbox-img');
+    if (!box || !img) return;
+
+    function close() {
+      box.hidden = true;
+      img.removeAttribute('src');
+      img.setAttribute('alt', '');
+    }
+
+    document.querySelectorAll('.thumb-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        img.setAttribute('src', btn.getAttribute('data-full') || '');
+        img.setAttribute('alt', btn.getAttribute('data-name') || '');
+        box.hidden = false;
+      });
+    });
+
+    box.addEventListener('click', function (e) {
+      if (e.target === box || e.target.classList.contains('lightbox-close')) close();
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !box.hidden) close();
+    });
+  })();
 </script>
