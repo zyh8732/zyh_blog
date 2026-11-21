@@ -7,19 +7,70 @@
     parent  : 当前节点路径；根层不传（视作 ""）
     depth   : 当前层级；根层传 0
 
-  每个节点下依次渲染：子节点 → 文章(.md) → 图片 → 文本(.txt)
-  （三类文件平铺在同一层，不分组）
+  每个节点下的顺序：文章(.md) → 文本(.txt) → 图片 → 子节点
 
-  ⚠️ 两条 Liquid 约束，改这个文件时务必保持：
+  ⚠️ 三条 Liquid 约束，改这个文件时务必保持：
    1. assign 写入「最外层作用域」，递归子调用会覆盖同名变量。
       所以每个变量都在紧挨着使用前重新赋值，绝不跨递归调用复用。
-   2. 不要给 for 循环变量重新赋值（{% assign cat = cat | strip %} 无效），
-      要用一个新名字。
+   2. 不要给 for 循环变量重新赋值。
    3. GitHub Pages 的 Jekyll 3.10 里 where_exp 只接受单个条件，不能写 and。
   ──────────────────────────────────────────────────────────
 {%- endcomment -%}
 
-{%- comment -%} ① 子节点（文件夹） {%- endcomment -%}
+{%- comment -%} ① 本层文章（.md） {%- endcomment -%}
+{%- assign arts = site.pages | where_exp: "p", "p.name contains '.md'" | where_exp: "p", "p.path != 'index.md'" -%}
+{%- for p in arts -%}
+  {%- assign segs = p.path | split: "/" -%}
+  {%- assign n    = segs.size | minus: 1 -%}
+  {%- assign pdir = segs | slice: 0, n | join: "/" -%}
+  {%- assign pcmp = include.parent | default: "" -%}
+  {%- if pdir == pcmp -%}
+    <li class="post"><a href="{{ p.url | relative_url }}">{{ p.name }}</a></li>
+  {%- endif -%}
+{%- endfor -%}
+
+{%- comment -%} ② 本层文本（.txt，走站内查看页） {%- endcomment -%}
+{%- for f in site.static_files -%}
+  {%- assign fp       = f.path | remove_first: "/" -%}
+  {%- assign segs     = fp | split: "/" -%}
+  {%- assign n        = segs.size | minus: 1 -%}
+  {%- assign fdir     = segs | slice: 0, n | join: "/" -%}
+  {%- assign firstseg = segs | first -%}
+  {%- assign pcmp     = include.parent | default: "" -%}
+  {%- assign ext      = f.extname | downcase -%}
+
+  {%- if firstseg != "assets" and fdir == pcmp -%}
+    {%- if ext == ".txt" -%}
+      <li class="file file-doc">
+        <a href="{{ '/read/' | relative_url }}?f={{ f.path | relative_url }}" target="_blank" rel="noopener">{{ f.name }}</a>
+      </li>
+    {%- endif -%}
+  {%- endif -%}
+{%- endfor -%}
+
+{%- comment -%} ③ 本层图片（点缩略图开灯箱） {%- endcomment -%}
+{%- for f in site.static_files -%}
+  {%- assign fp       = f.path | remove_first: "/" -%}
+  {%- assign segs     = fp | split: "/" -%}
+  {%- assign n        = segs.size | minus: 1 -%}
+  {%- assign fdir     = segs | slice: 0, n | join: "/" -%}
+  {%- assign firstseg = segs | first -%}
+  {%- assign pcmp     = include.parent | default: "" -%}
+  {%- assign ext      = f.extname | downcase -%}
+
+  {%- if firstseg != "assets" and fdir == pcmp -%}
+    {%- if ext == ".png" or ext == ".jpg" or ext == ".jpeg" or ext == ".gif" or ext == ".webp" or ext == ".svg" or ext == ".avif" -%}
+      <li class="file file-img">
+        <button type="button" class="thumb-btn" data-full="{{ f.path | relative_url }}" data-name="{{ f.name }}">
+          <img class="thumb" src="{{ f.path | relative_url }}" alt="{{ f.name }}" loading="lazy">
+        </button>
+        <span class="file-name">{{ f.name }}</span>
+      </li>
+    {%- endif -%}
+  {%- endif -%}
+{%- endfor -%}
+
+{%- comment -%} ④ 子节点（文件夹） {%- endcomment -%}
 {%- for folder in include.folders -%}
   {%- assign pcmp     = include.parent | default: "" -%}
   {%- assign segs     = folder | split: "/" -%}
@@ -40,42 +91,5 @@
         </ul>
       </details>
     </li>
-  {%- endif -%}
-{%- endfor -%}
-
-{%- comment -%} ② 本层文件：文章(.md) 优先，然后图片、文本 {%- endcomment -%}
-{%- assign arts = site.pages | where_exp: "p", "p.name contains '.md'" | where_exp: "p", "p.path != 'index.md'" -%}
-{%- for p in arts -%}
-  {%- assign segs = p.path | split: "/" -%}
-  {%- assign n    = segs.size | minus: 1 -%}
-  {%- assign pdir = segs | slice: 0, n | join: "/" -%}
-  {%- assign pcmp = include.parent | default: "" -%}
-  {%- if pdir == pcmp -%}
-    <li class="post"><a href="{{ p.url | relative_url }}">{{ p.name }}</a></li>
-  {%- endif -%}
-{%- endfor -%}
-
-{%- for f in site.static_files -%}
-  {%- assign fp       = f.path | remove_first: "/" -%}
-  {%- assign segs     = fp | split: "/" -%}
-  {%- assign n        = segs.size | minus: 1 -%}
-  {%- assign fdir     = segs | slice: 0, n | join: "/" -%}
-  {%- assign firstseg = segs | first -%}
-  {%- assign pcmp     = include.parent | default: "" -%}
-  {%- assign ext      = f.extname | downcase -%}
-
-  {%- if firstseg != "assets" and fdir == pcmp -%}
-    {%- if ext == ".png" or ext == ".jpg" or ext == ".jpeg" or ext == ".gif" or ext == ".webp" or ext == ".svg" or ext == ".avif" -%}
-      <li class="file file-img">
-        <button type="button" class="thumb-btn" data-full="{{ f.path | relative_url }}" data-name="{{ f.name }}">
-          <img class="thumb" src="{{ f.path | relative_url }}" alt="{{ f.name }}" loading="lazy">
-        </button>
-        <span class="file-name">{{ f.name }}</span>
-      </li>
-    {%- elsif ext == ".txt" -%}
-      <li class="file file-doc">
-        <a href="{{ '/read/' | relative_url }}?f={{ f.path | relative_url }}" target="_blank" rel="noopener">{{ f.name }}</a>
-      </li>
-    {%- endif -%}
   {%- endif -%}
 {%- endfor -%}

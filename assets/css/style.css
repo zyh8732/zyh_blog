@@ -241,3 +241,10 @@ footer{
   white-space:pre-wrap; word-break:break-word;
   font:0.86rem/1.7 ui-monospace,SFMono-Regular,Consolas,monospace;
 }
+
+/* 首页列表里的图片：按钮触发灯箱，样式做成链接 */
+.post-list .thumb-btn{
+  font:inherit; color:var(--accent); cursor:zoom-in;
+  padding:0; border:0; background:none; line-height:inherit;
+}
+.post-list .thumb-btn:hover{ text-decoration:underline; }
