@@ -5,7 +5,9 @@ layout: default
 {%- if pname == nil or pname == "" -%}
   {%- assign pname = page.name | split: "." | first -%}
 {%- endif -%}
-{%- assign pdir = page.dir | default: "/" | remove_first: "/" | remove_last: "/" -%}
+{%- assign segs = page.path | split: "/" -%}
+{%- assign n    = segs.size | minus: 1 -%}
+{%- assign pdir = segs | slice: 0, n | join: "/" -%}
 
 <article class="post">
   <h1>{{ pname }}</h1>

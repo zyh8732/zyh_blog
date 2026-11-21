@@ -3,7 +3,7 @@ layout: default
 title: 树
 permalink: /blog/
 ---
-{%- assign arts = site.pages | where_exp: "p", "p.name contains '.md' and p.path != 'index.md'" -%}
+{%- assign arts = site.pages | where_exp: "p", "p.name contains '.md'" | where_exp: "p", "p.path != 'index.md'" -%}
 <h1>树</h1>
 <p class="meta">共 {{ arts.size }} 篇 · 图片与 .txt 直接放在节点目录里</p>
 

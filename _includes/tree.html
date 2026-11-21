@@ -14,7 +14,7 @@
 {%- assign collected = "" -%}
 
 {%- comment -%} ① 文章（.md 页面，index.md 除外）所在的目录 {%- endcomment -%}
-{%- assign articles = site.pages | where_exp: "p", "p.name contains '.md' and p.path != 'index.md'" -%}
+{%- assign articles = site.pages | where_exp: "p", "p.name contains '.md'" | where_exp: "p", "p.path != 'index.md'" -%}
 {%- for p in articles -%}
   {%- assign segs = p.path | split: "/" -%}
   {%- assign n    = segs.size | minus: 1 -%}

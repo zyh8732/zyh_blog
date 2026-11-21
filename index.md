@@ -15,7 +15,7 @@ title: 首页
 
 <p>全部：</p>
 
-{%- assign arts = site.pages | where_exp: "p", "p.name contains '.md' and p.path != 'index.md'" | sort: "path" -%}
+{%- assign arts = site.pages | where_exp: "p", "p.name contains '.md'" | where_exp: "p", "p.path != 'index.md'" -%}
 <ul class="post-list">
   {%- for p in arts %}
   {%- assign segs = p.path | split: "/" -%}

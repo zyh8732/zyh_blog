@@ -42,7 +42,7 @@
 {%- endfor -%}
 
 {%- comment -%} ② 文章(md) {%- endcomment -%}
-{%- assign arts = site.pages | where_exp: "p", "p.name contains '.md' and p.path != 'index.md'" -%}
+{%- assign arts = site.pages | where_exp: "p", "p.name contains '.md'" | where_exp: "p", "p.path != 'index.md'" -%}
 {%- capture arts_html -%}
   {%- for p in arts -%}
     {%- assign segs = p.path | split: "/" -%}
